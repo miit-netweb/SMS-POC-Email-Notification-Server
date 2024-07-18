@@ -2,7 +2,8 @@ package Microservice.Email_Notification.dto;
 
 public class MessageDto {
     private String email;
-    private String message;
+    private String fname;
+    private String lname;
     private long memId;
     private int code;
 
@@ -17,12 +18,20 @@ public class MessageDto {
         this.email = email;
     }
 
-    public String getMessage() {
-        return message;
+    public String getFname() {
+        return fname;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setFname(String fname) {
+        this.fname = fname;
+    }
+
+    public String getLname() {
+        return lname;
+    }
+
+    public void setLname(String lname) {
+        this.lname = lname;
     }
 
     public long getMemId() {
@@ -45,7 +54,6 @@ public class MessageDto {
     public String toString() {
         return "MessageDto{" +
                 "email='" + email + '\'' +
-                ", message='" + message + '\'' +
                 ", memId=" + memId +
                 ", code=" + code +
                 '}';
