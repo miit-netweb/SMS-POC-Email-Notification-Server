@@ -18,7 +18,6 @@ public class RabbitMQConsumer {
     private EmailHelper emailHelper;
     @Autowired
     private EmailTemplateService emailTemplateService;
-    @Autowired
     private final Logger LOGGER = LoggerFactory.getLogger(RabbitMQConsumer.class);
 
     @RabbitListener(queues = {"${rabbitmq.queue.name}"})
@@ -26,15 +25,15 @@ public class RabbitMQConsumer {
         try {
             LOGGER.info("The message has been dequeued properly for "+ message.getMemId());
             int emailCode = message.getCode();
-            LOGGER.info("Email template has been fetch initiated for "+ message.getMemId()+" code "+message.getCode());
+            LOGGER.info("Email template fetch initiated for "+ message.getMemId()+" code "+message.getCode());
             final EmailTemplate emailTemplateFromCode = emailTemplateService.getEmailTemplateFromCode(emailCode);
             LOGGER.info("Email template has been fetch successfully for "+ message.getMemId());
             HashMap<String,String> body = new HashMap<>();
             body.put("fname", message.getFname());
             body.put("lname", message.getLname());
             LOGGER.info("Email has been initiated for "+ message.getMemId());
-            emailHelper.sendEmail(message.getEmail(), emailTemplateFromCode.getSubject(),body,emailTemplateFromCode.getTemplateName());
-            LOGGER.info("Email has been sent properly for "+ message.getMemId());
+            if(emailHelper.sendEmail(message.getEmail(), emailTemplateFromCode.getSubject(),body,emailTemplateFromCode.getTemplateName()))
+                LOGGER.info("Email has been sent properly for "+ message.getMemId());
         } catch (Exception e){
             LOGGER.error("Runtime exception occurred "+ e.getMessage()+" for memId "+message.getMemId());
         }
