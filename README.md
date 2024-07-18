@@ -1,6 +1,3 @@
-
-### email-service 
-```markdown
 # Email Service for Subscriber Management System (SMS)
 
 ## Overview
