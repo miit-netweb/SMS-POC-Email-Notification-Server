@@ -1,9 +1,11 @@
 package Microservice.Email_Notification.consumer;
 
 import Microservice.Email_Notification.dto.MessageDto;
-import Microservice.Email_Notification.entity.EmailTemplate;
+//import Microservice.Email_Notification.entity.EmailTemplate;
+import Microservice.Email_Notification.entity.EmailPending;
+import Microservice.Email_Notification.entity.EmailSuccess;
 import Microservice.Email_Notification.helper.EmailHelper;
-import Microservice.Email_Notification.service.EmailTemplateService;
+import Microservice.Email_Notification.service.EmailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -17,25 +19,22 @@ public class RabbitMQConsumer {
     @Autowired
     private EmailHelper emailHelper;
     @Autowired
-    private EmailTemplateService emailTemplateService;
+    private EmailService emailService;
     private final Logger LOGGER = LoggerFactory.getLogger(RabbitMQConsumer.class);
 
     @RabbitListener(queues = {"${rabbitmq.queue.name}"})
-    public void consumeMessage(MessageDto message){
+    public void consumeMessage(EmailPending message){
         try {
-            LOGGER.info("The message has been dequeued properly for "+ message.getMemId());
-            int emailCode = message.getCode();
-            LOGGER.info("Email template fetch initiated for "+ message.getMemId()+" code "+message.getCode());
-            final EmailTemplate emailTemplateFromCode = emailTemplateService.getEmailTemplateFromCode(emailCode);
-            LOGGER.info("Email template has been fetch successfully for "+ message.getMemId());
+
             HashMap<String,String> body = new HashMap<>();
-            body.put("fname", message.getFname());
-            body.put("lname", message.getLname());
-            LOGGER.info("Email has been initiated for "+ message.getMemId());
-            if(emailHelper.sendEmail(message.getEmail(), emailTemplateFromCode.getSubject(),body,emailTemplateFromCode.getTemplateName()))
-                LOGGER.info("Email has been sent properly for "+ message.getMemId());
+            body.put("SubscriberNumber", message.getSubscriberNumber());
+//            if(emailHelper.sendEmail(message.getEmail(), emailTemplateFromCode.getSubject(),body,emailTemplateFromCode.getTemplateName()))
+            emailHelper.sendEmail(message.getEmailId(), "WELCOME_SMS_APPLICATION",body,"welcome_template");
+            LOGGER.info("Email has been sent properly for "+ message.getSubscriberNumber());
+            emailService.removePendingEntry(message);
+            emailService.addSuccessEntry(new EmailSuccess(message.getSubscriberNumber(),message.getEmailId(),message.getCode(),"EMAIL_SUCCESS"));
         } catch (Exception e){
-            LOGGER.error("Runtime exception occurred "+ e.getMessage()+" for memId "+message.getMemId());
+            LOGGER.error("Runtime exception occurred "+ e.getMessage()+" for memId "+message.getSubscriberNumber());
         }
     }
 }
