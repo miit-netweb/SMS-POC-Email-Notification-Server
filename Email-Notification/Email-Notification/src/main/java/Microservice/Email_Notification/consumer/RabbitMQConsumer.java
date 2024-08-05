@@ -1,7 +1,5 @@
 package Microservice.Email_Notification.consumer;
 
-import Microservice.Email_Notification.dto.MessageDto;
-//import Microservice.Email_Notification.entity.EmailTemplate;
 import Microservice.Email_Notification.entity.EmailPending;
 import Microservice.Email_Notification.entity.EmailSuccess;
 import Microservice.Email_Notification.helper.EmailHelper;
@@ -29,12 +27,16 @@ public class RabbitMQConsumer {
             HashMap<String,String> body = new HashMap<>();
             body.put("SubscriberNumber", message.getSubscriberNumber());
 //            if(emailHelper.sendEmail(message.getEmail(), emailTemplateFromCode.getSubject(),body,emailTemplateFromCode.getTemplateName()))
-            emailHelper.sendEmail(message.getEmailId(), "WELCOME_SMS_APPLICATION",body,"welcome_template");
-            LOGGER.info("Email has been sent properly for "+ message.getSubscriberNumber());
-            emailService.removePendingEntry(message);
-            emailService.addSuccessEntry(new EmailSuccess(message.getSubscriberNumber(),message.getEmailId(),message.getCode(),"EMAIL_SUCCESS"));
+            boolean b = emailHelper.sendEmail(message.getEmailId(), "WELCOME_SMS_APPLICATION", body, "welcome_template");
+            if(b)
+            {
+                LOGGER.info("Email has been sent properly for "+ message.getSubscriberNumber());
+                emailService.removePendingEntry(message);
+                emailService.addSuccessEntry(new EmailSuccess(message.getSubscriberNumber(),message.getEmailId(),message.getCode(),"EMAIL_SUCCESS"));
+            }
         } catch (Exception e){
             LOGGER.error("Runtime exception occurred "+ e.getMessage()+" for memId "+message.getSubscriberNumber());
         }
     }
 }
+ 
