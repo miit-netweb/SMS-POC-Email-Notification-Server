@@ -30,12 +30,14 @@ public class RabbitMQConsumer {
             boolean b = emailHelper.sendEmail(message.getEmailId(), "WELCOME_SMS_APPLICATION", body, "welcome_template");
             if(b)
             {
-                LOGGER.info("Email has been sent properly for "+ message.getSubscriberNumber());
+                LOGGER.info("Email has been sent properly for {}", message.getSubscriberNumber());
                 emailService.removePendingEntry(message);
+                LOGGER.info("Email entry removed from email-pending-table for {}",message.getSubscriberNumber());
                 emailService.addSuccessEntry(new EmailSuccess(message.getSubscriberNumber(),message.getEmailId(),message.getCode(),"EMAIL_SUCCESS"));
+                LOGGER.info("Email entry inserted into email-success-table for {}",message.getSubscriberNumber());
             }
         } catch (Exception e){
-            LOGGER.error("Runtime exception occurred "+ e.getMessage()+" for memId "+message.getSubscriberNumber());
+            LOGGER.error("Runtime exception occurred {} for memId {}", e.getMessage(), message.getSubscriberNumber());
         }
     }
 }

@@ -44,11 +44,10 @@ public class EmailHelper {
             helper.setSubject(subject);
             helper.setText(htmlBody, true); // true indicates the html content
             mailSender.send(message);
-            LOGGER.info(String.format("%s message mail is sent to -> %s",template,toMail));
+            LOGGER.info("{} message mail is sent to -> {}",template,toMail);
             return true;
         } catch (Exception e) {
-            LOGGER.error(String.format("Runtime exception -> %s occurred for %s",e.getMessage(),toMail));
-            e.printStackTrace();
+            LOGGER.error("Runtime exception -> {} occurred for {}",e.getMessage(),toMail);
             return false;
         }
     }
