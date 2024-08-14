@@ -10,6 +10,14 @@ public class MessageDto {
     public MessageDto() {
     }
 
+    public MessageDto(String email, String fname, String lname, long memId, int code) {
+        this.email = email;
+        this.fname = fname;
+        this.lname = lname;
+        this.memId = memId;
+        this.code = code;
+    }
+
     public String getEmail() {
         return email;
     }
