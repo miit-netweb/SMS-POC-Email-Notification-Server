@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -41,7 +42,7 @@ public class RabbitMQConsumer {
 
             int randomNumber = random.nextInt(max - min + 1) + min;
             if(randomNumber<4){
-                emailProducer.sendMessage(new EmailStatus(LocalDate.now().toString(),"EMAIL-FAILURE"));
+                emailProducer.sendMessage(new EmailStatus(LocalDateTime.now().toString(),"EMAIL-FAILURE"));
             } else {
                 boolean b = emailHelper.sendEmail(message.getEmailId(), "WELCOME_SMS_APPLICATION", body, "welcome_template");
                 if(b)
@@ -52,10 +53,10 @@ public class RabbitMQConsumer {
                     emailService.addSuccessEntry(new EmailSuccess(message.getSubscriberNumber(),message.getEmailId(),message.getCode(),"EMAIL_SUCCESS"));
                     LOGGER.info("Email entry inserted into email-success-table for {}",message.getSubscriberNumber());
 
-                    emailProducer.sendMessage(new EmailStatus(LocalDate.now().toString(),"EMAIL-SUCCESS"));
+                    emailProducer.sendMessage(new EmailStatus(LocalDateTime.now().toString(),"EMAIL-SUCCESS"));
                 }
                 else {
-                    emailProducer.sendMessage(new EmailStatus(LocalDate.now().toString(),"EMAIL-FAILURE"));
+                    emailProducer.sendMessage(new EmailStatus(LocalDateTime.now().toString(),"EMAIL-FAILURE"));
                 }
             }
         } catch (Exception e){
