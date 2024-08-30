@@ -32,7 +32,7 @@ public class RabbitMQConsumer {
 
     public RabbitMQConsumer() {
         codeToTemplateMapper.put(800, new TemplateInfo("WELCOME_SMS_APPLICATION","welcome_template"));
-        codeToTemplateMapper.put(801, new TemplateInfo("UPDATE_SMS_INFORMATION","welcome_template"));
+        codeToTemplateMapper.put(801, new TemplateInfo("UPDATE_SMS_INFORMATION","update_template"));
     }
 
     @RabbitListener(queues = {"${rabbitmq.queue.name}"})
