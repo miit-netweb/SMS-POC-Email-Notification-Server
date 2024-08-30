@@ -1,6 +1,7 @@
 package Microservice.Email_Notification.consumer;
 
 import Microservice.Email_Notification.dto.EmailStatus;
+import Microservice.Email_Notification.dto.TemplateInfo;
 import Microservice.Email_Notification.entity.EmailPending;
 import Microservice.Email_Notification.entity.EmailSuccess;
 import Microservice.Email_Notification.helper.EmailHelper;
@@ -25,26 +26,24 @@ public class RabbitMQConsumer {
     private EmailService emailService;
     @Autowired
     private EmailProducer emailProducer;
+    private final HashMap<Integer, TemplateInfo> codeToTemplateMapper = new HashMap<>();
 
     private final Logger LOGGER = LoggerFactory.getLogger(RabbitMQConsumer.class);
+
+    public RabbitMQConsumer() {
+        codeToTemplateMapper.put(800, new TemplateInfo("WELCOME_SMS_APPLICATION","welcome_template"));
+        codeToTemplateMapper.put(801, new TemplateInfo("UPDATE_SMS_INFORMATION","welcome_template"));
+    }
 
     @RabbitListener(queues = {"${rabbitmq.queue.name}"})
     public void consumeMessage(EmailPending message){
         try {
-
+            // dynamic value for template
+            // Todo generic hashmap for template
             HashMap<String,String> body = new HashMap<>();
             body.put("SubscriberNumber", message.getSubscriberNumber());
-//            if(emailHelper.sendEmail(message.getEmail(), emailTemplateFromCode.getSubject(),body,emailTemplateFromCode.getTemplateName()))
-
-            Random random = new Random();
-            int min = 1;
-            int max = 10;
-
-            int randomNumber = random.nextInt(max - min + 1) + min;
-            if(randomNumber<4){
-                emailProducer.sendMessage(new EmailStatus(LocalDateTime.now().toString(),"EMAIL-FAILURE"));
-            } else {
-                boolean b = emailHelper.sendEmail(message.getEmailId(), "WELCOME_SMS_APPLICATION", body, "welcome_template");
+                TemplateInfo templateInfo = codeToTemplateMapper.get(message.getCode());
+                boolean b = emailHelper.sendEmail(message.getEmailId(), templateInfo.getSubject(), body,templateInfo.getTemplateName());
                 if(b)
                 {
                     LOGGER.info("Email has been sent properly for {}", message.getSubscriberNumber());
@@ -52,13 +51,11 @@ public class RabbitMQConsumer {
                     LOGGER.info("Email entry removed from email-pending-table for {}",message.getSubscriberNumber());
                     emailService.addSuccessEntry(new EmailSuccess(message.getSubscriberNumber(),message.getEmailId(),message.getCode(),"EMAIL_SUCCESS"));
                     LOGGER.info("Email entry inserted into email-success-table for {}",message.getSubscriberNumber());
-
                     emailProducer.sendMessage(new EmailStatus(LocalDateTime.now().toString(),"EMAIL-SUCCESS"));
                 }
                 else {
                     emailProducer.sendMessage(new EmailStatus(LocalDateTime.now().toString(),"EMAIL-FAILURE"));
                 }
-            }
         } catch (Exception e){
             LOGGER.error("Runtime exception occurred {} for memId {}", e.getMessage(), message.getSubscriberNumber());
         }
